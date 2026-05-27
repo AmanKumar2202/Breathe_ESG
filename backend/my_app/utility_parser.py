@@ -29,33 +29,43 @@ class UtilityParser:
 
     def parse(self, file_obj, job):
 
-        decoded_file = (
-            file_obj
-            .read()
-            .decode('utf-8')
-            .splitlines()
-        )
+        content = file_obj.read()
 
-        reader = csv.DictReader(decoded_file)
+        if isinstance(content, bytes):
+            content = content.decode('utf-8')
+
+        reader = csv.DictReader(content.splitlines())
 
         for line_number, row in enumerate(reader, start=2):
 
             try:
 
                 raw_rec = RawUtilityRecord.objects.create(
-                    ingestion_job=job,
+                    job=job,
+
+                    raw_line_number=line_number,
+
                     raw_data=row,
+
+                    meter_id=row.get("meter_id"),
+
                     site_name=self._extract_site_name(row),
-                    utility_type=self._extract_utility_type(row),
-                    usage_value=self._extract_usage_value(row),
-                    usage_unit=self._extract_usage_unit(row),
-                    bill_date=self._extract_bill_date(row),
+
+                    billing_period_start=self._extract_bill_date(row),
+
+                    billing_period_end=self._extract_bill_date(row),
+
+                    consumption_value=self._extract_usage_value(row),
+
+                    consumption_unit=self._extract_usage_unit(row),
+
+                    is_parsed=True,
                 )
 
-                usage_value = Decimal(str(raw_rec.usage_value))
+                consumption_value = Decimal(str(raw_rec.consumption_value))
 
                 original_unit = (
-                    raw_rec.usage_unit
+                    raw_rec.consumption_unit
                     .strip()
                     .upper()
                 )
@@ -66,7 +76,7 @@ class UtilityParser:
                 )
 
                 activity_value = (
-                    usage_value * multiplier
+                    consumption_value * multiplier
                 )
 
                 activity_unit = 'kWh'
@@ -224,7 +234,7 @@ class UtilityParser:
 
         candidates = [
             'usage',
-            'usage_value',
+            'consumption_value',
             'consumption',
             'amount',
             'kwh'
@@ -252,7 +262,7 @@ class UtilityParser:
 
         candidates = [
             'unit',
-            'usage_unit',
+            'consumption_unit',
             'uom'
         ]
 
