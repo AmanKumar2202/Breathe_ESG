@@ -179,7 +179,7 @@ class EmissionRecord(models.Model):
     source_row_model = models.CharField(max_length=255)
 
     # GHG classification
-    scope = models.CharField(max_length=1, choices=SCOPE_CHOICES)
+    scope = models.CharField(max_length=20, choices=SCOPE_CHOICES)
     category = models.CharField(max_length=255)
 
     # Activity data (normalized)
