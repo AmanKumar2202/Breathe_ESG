@@ -17,7 +17,11 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-default-key-breathe-e
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = [
+    "127.0.0.1",
+    "localhost",
+    ".onrender.com",
+]
 
 # Application definition
 INSTALLED_APPS = [
@@ -41,7 +45,6 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -106,20 +109,20 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
 # CORS Configuration
+
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
 ]
 
-# Optional but recommended for authentication cookies/tokens
+frontend_url = config("FRONTEND_URL", default="")
+
+if frontend_url:
+    CORS_ALLOWED_ORIGINS.append(frontend_url)
+
 CORS_ALLOW_CREDENTIALS = True
 
-
-prod_frontend = config('FRONTEND_URL', default='')
-if prod_frontend:
-    CORS_ALLOWED_ORIGINS.append(prod_frontend)
 
 # DRF & JWT Configuration
 REST_FRAMEWORK = {
@@ -141,11 +144,3 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': True,
 }
 
-
-STATIC_URL = "static/"
-
-STATIC_ROOT = BASE_DIR / "staticfiles"
-
-STATICFILES_STORAGE = (
-    "whitenoise.storage.CompressedManifestStaticFilesStorage"
-)
